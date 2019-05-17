@@ -50,7 +50,7 @@ namespace YoutubeDownloader.Services
             var request = new RestRequest($"youtube/v3/{identifier}", Method.GET);
             request.AddParameter("part", "snippet");
             request.AddParameter("maxResults", "50");
-            request.AddParameter("id", id);
+            request.AddParameter(identifier == "playlistItems" ? "playlistId" : "id", id);
             request.AddParameter("key", this.apiKey);
 
             if (pageToken != null)

@@ -85,7 +85,7 @@ namespace YoutubeDownloader
             if (queryParams.AllKeys.Contains("list"))
             {
                 id = queryParams["list"];
-                identifier = "playlists";
+                identifier = "playlistItems";
                 return true;
             }
             return false;

@@ -20,6 +20,8 @@ namespace YoutubeDownloader.Services
             get => apiKey;
         }
 
+        public string Format { get; set; }
+
         public YouTubeClientWrapper(string apiKey)
         {
             this.apiKey = apiKey;
@@ -41,7 +43,7 @@ namespace YoutubeDownloader.Services
             }
         }
 
-        private PlayListResult GetDataAsync(string id,string identifier, string pageToken = null, Action<string> ErrorHandler = null)
+        private PlayListResult GetDataAsync(string id, string identifier, string pageToken = null, Action<string> ErrorHandler = null)
         {
             PlayListResult result = null;
 
@@ -71,12 +73,13 @@ namespace YoutubeDownloader.Services
             return result;
         }
 
-        public async Task DownloadVideos(string path)
+        public async Task DownloadVideos(string path, Action<int> indexChanged)
         {
             var client = new YoutubeClient();
 
-            foreach (Item video in Videos)
+            for (var index = 0; index < Videos.Count; index++)
             {
+                Item video = Videos[index];
                 // Get metadata for all streams in this video
 
                 var streamInfoSet = video.Snippet.ResourceId != null
@@ -89,10 +92,13 @@ namespace YoutubeDownloader.Services
                 var ext = streamInfo.Container.GetFileExtension();
 
                 string fileName = Utilities.RemoveInvalidChars(video.Snippet.Title);
-                string fullPath = System.IO.Path.Combine(path, $"{path}/{fileName}.{ext}");
-               
+                string extension = Format == "Default" ? ext : Format;
+                string fullPath = System.IO.Path.Combine(path, $"{fileName}.{extension}");
+
                 // Download stream to file
                 await client.DownloadMediaStreamAsync(streamInfo, fullPath);
+
+                indexChanged(index + 1);
             }
         }
     }

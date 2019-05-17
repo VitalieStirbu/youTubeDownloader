@@ -12,6 +12,7 @@ namespace YoutubeDownloader
     {
         private readonly string _apiKey = ConfigurationManager.AppSettings["ApiKey"];
         private readonly YouTubeClientWrapper youTubeClient;
+
         public Main()
         {
             InitializeComponent();
@@ -22,6 +23,7 @@ namespace YoutubeDownloader
         private void SetDefaults()
         {
             lblDownloadPath.Text = System.IO.Path.GetTempPath();
+            cmbFormat.SelectedIndex = 0;
         }
 
         private void btnDownloadPath_Click(object sender, EventArgs e)
@@ -47,6 +49,7 @@ namespace YoutubeDownloader
             }
 
             youTubeClient.GetPlaylist(id, identifier, error => MessageBox.Show(error));
+            youTubeClient.Format = cmbFormat.SelectedText;
             lstVideos.DataSource = youTubeClient.Videos.Select(SelectFunc).ToList();
             lblTotal.Text = youTubeClient.Videos.Count.ToString();
             btnDownload.Enabled = true;
@@ -91,10 +94,15 @@ namespace YoutubeDownloader
             return false;
         }
 
-        private async void btnDownload_Click(object sender, EventArgs e)
+        private void btnDownload_Click(object sender, EventArgs e)
         {
-            await youTubeClient.DownloadVideos(lblDownloadPath.Text);
-            MessageBox.Show("Success!");
+            var progressForm = new ProgressForm(youTubeClient, lblDownloadPath.Text);
+            progressForm.Show();
+        }
+
+        private void cmbFormat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            youTubeClient.Format = cmbFormat.Text;
         }
     }
 }
